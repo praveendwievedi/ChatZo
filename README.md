@@ -1,1 +1,2 @@
-# chat_mern\n\nThis project is a chat application built using the MERN stack.
+# chat_mern
+This project is a chat application built using the MERN stack.
