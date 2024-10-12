@@ -1,11 +1,20 @@
 import React from 'react'
+import axios from 'axios'
+import {UserContextProvider} from './authServices/userContext'
+import Routes from './component/Routes'
+import {ToastContainer} from 'react-toastify'
 
 function App() {
-  return (
-    <div className='bg-red-500 h-screen text-white'>
-      test
-    </div>
-  )
-}
+  axios.defaults.baseURL='http://localhost:3000'
+  axios.defaults.withCredentials=true
 
+  return (
+    <UserContextProvider>
+      <Routes />
+      <ToastContainer />
+    </UserContextProvider>
+    
+  );
+
+}
 export default App

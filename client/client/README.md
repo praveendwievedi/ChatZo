@@ -1,8 +1,4 @@
-# mern_chat
-
-This project is a chat application built using the MERN stack.
-
-## React + Vite
+# React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
