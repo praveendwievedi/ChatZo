@@ -32,10 +32,13 @@ res.send('hello i am working fine')
 })
 
 app.get('/user/profile',(req,res)=>{
-
+    // console.log(req.cookies);
+    
     const token=req.cookies?.tokens;
+    // console.log(token);
+    
     if(!token){
-        return res.status(401).json('not authorized')
+        return res.status(401).send('not authorized')
     }
     else{
         const userData= jwt.verify(token,secretKey)
@@ -56,24 +59,39 @@ app.post('/user/register',async (req,res)=>{
     password
    })
 
- await jwt.sign({id:createdUser._id,userName},secretKey,{},(token,err)=>{
-   return res.cookie('tokens',token).status(201).send('looged in')
- });
-   
+  const token=await jwt.sign({id:createdUser._id,userName:createdUser.userName},secretKey);
+   return res.cookie('tokens',token,{
+    sameSite:'none',
+    secure:true,
+}).status(201).send('user created')
 })
 
 app.post('/user/login',async (req,res)=>{
     const {email,password}=req.body;
+    
     if (!email || !password) {
         return res.status(400).json({ error: 'All fields are required' });
     }
     
-   const userData=await userModel.findOne({ email})
+   const userData=await userModel.findOne({ email,password})
 
- await jwt.sign({id:userData._id,userName:userData.userName},secretKey,{},(token,err)=>{
-   return res.cookie('tokens',token).status(201).send('looged in')
- });
+   if(userData){
+        const token=await jwt.sign({id:userData._id,userName:userData.userName},secretKey);
+      return res.cookie('tokens',token,{
+        sameSite:'none',
+        secure:true,
+       }).status(200).send('user logged in')
+    
+   }else{
+    return res.status(401).send('wrong credentials')
+   }
    
+})
+
+app.get('/user/logout',(req,res)=>{
+    
+    return res.cookie('tokens','',{sameSite:'none',secure:true}).status(200).send('user Logged out')
+    
 })
 
 app.listen(port,()=>console.log(`server running on port: ${port}`))

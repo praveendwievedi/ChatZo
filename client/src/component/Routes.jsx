@@ -1,26 +1,29 @@
-import React,{useContext,useEffect} from 'react'
+import React,{useContext,useEffect, useState} from 'react'
 import Register from './Register'
 import {userContext} from '../authServices/userContext'
 import axios from 'axios'
 
 function Routes() {
-  const {setUserName,setId}=useContext(userContext)
+  const {userName,id,userStatus,setUserStatus,logout}=useContext(userContext)
+  const [userData,setUserData]=useState('')
   
-  useEffect(()=>{
-    axios.get('/user/profile').then((res)=>{
-      
-      const {data}=res;
-      setUserName(data.userName)
-      setId(data.id)
-    })
-    .catch((err)=>{
-      if(err)throw err;
-    })
-  },[])
+  const logOut=()=>{
+    logout()
+  }
 
+   if(userStatus === 'loggedin'){
+    return (
+      <div>
+      <p>Welcome 😃!! {userName} </p>
+      <button className='bg-blue-400 rounded-md px-2 py-4' onClick={logOut}>Logout</button>
+      </div>
+    )
+   }
+   else{
   return (
     <Register />
   )
+ }
 }
 
 export default Routes

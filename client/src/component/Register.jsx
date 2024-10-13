@@ -8,33 +8,27 @@ function Register() {
   const [password,setPassword]=useState('');
   const [loggedInstatus,setLoggedInStatus]=useState('register')
 
-  const {userName:loggedInUserName,id} =useContext(userContext);
-
-  // const {setUserName as setLogedinUser,}
-   
-  const handleRegister= (e)=>{
+   const {login}=useContext(userContext)
+  const handleSUbmit= (e)=>{
     e.preventDefault();
  
    if(loggedInstatus === 'register'){
-    axios.post('/user/register',{userName,email,password}).finally((err,data)=>{
-      if(err)throw err;
-      setLoggedInStatus('login')
-      toast.success(`Hello ${userName}!😃`, {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 3000,  // Auto close after 3 seconds
-      });
+    axios.post('/user/register',{userName,email,password}).then((response)=>{
+     const {data}=response;
+       login()
+    })
+    .catch((err)=>{
+      throw err;
     })
    }
    else{
-    axios.post('/user/login',{email,password}).finally((err)=>{
-      if(err)throw err;
-      setUserName(loggedInUserName)
-      toast.success(`Hello ${userName}!😃`, {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 3000,  // Auto close after 3 seconds
-      });
-    })
-    
+    axios.post('/user/login',{email,password}).then((response)=>{
+      const {data}=response;
+      login()
+     })
+     .catch((err)=>{
+       throw err;
+     })
    }
   }
 
@@ -42,9 +36,9 @@ function Register() {
   return (
     <div className='bg-blue-50 h-screen w-sreen flex items-center'>
     <div className="w-80 relative flex flex-col p-4 rounded-md text-black bg-white mx-auto">
-      <div className="text-2xl font-bold mb-2 text-[#1e0e4b] text-center">Welcome<span className="text-[#7747ff] px-1">{loggedInstatus === 'login' ? `back ${userName}` : ''} 😃</span></div>
+      <div className="text-2xl font-bold mb-2 text-[#1e0e4b] text-center">Welcome<span className="text-[#7747ff] px-1">{loggedInstatus === 'login' ? 'back' : ''} 😃</span></div>
        <div className="text-sm font-normal mb-4 text-center text-[#1e0e4b]">{loggedInstatus === 'register' ? 'Sign up to create your account' : 'Login  to your account'}</div>
-      <form className="flex flex-col gap-3" onSubmit={handleRegister}>
+      <form className="flex flex-col gap-3" onSubmit={handleSUbmit}>
       {loggedInstatus === 'register' && 
         <div className="block relative"> 
       <label className="block text-gray-600 cursor-text text-sm leading-[140%] font-normal mb-2">Username</label>
@@ -79,7 +73,7 @@ function Register() {
     <button 
     type="submit" 
     className="bg-blue-400 w-max m-auto px-6 py-2 rounded text-white text-sm font-normal">
-    {loggedInstatus === 'register' ? 'Register' : 'Sign In'}</button>
+    {loggedInstatus === 'register' ? 'Register' : 'Log In'}</button>
 
     </form>
     {loggedInstatus === 'register' && 
