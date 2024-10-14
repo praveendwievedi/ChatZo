@@ -4,41 +4,46 @@ import axios from 'axios'
 export const userContext=createContext({})
 
 export function UserContextProvider({children}){
-     const [userName,setUserName]=useState('')
-     const [id,setId]=useState('')
-     const [userStatus,setUserStatus]=useState('')
-
-    //  const login=()=>{
-    //     setUserStatus('loggedin')
-    //  }
-
+     const [user,setUser]=useState({
+       id:null,
+       userName:null,
+       isLogedIn:false
+     })
   
 
-  const login=()=>{
-    axios.get('/user/profile').then((response)=>{
-        const {data}=response;
-        setUserName(data.userName)
-        setId(data.id)
-        setUserStatus('loggedin')
-    })
-    .catch((err)=>{
-      console.log(err);
-    })
+     useEffect(()=>{
+      axios.get('/user/profile').then((res)=>{
+        const {data}=res;
+        setUser({
+          id:data.id,
+          userName:data.userName,
+          isLogedIn:true
+        })
+      })
+      .catch((err)=>{
+        throw err;
+      })
+     },[])
+  const login=(data)=>{
+   
+        setUser({
+          id:data.id,
+          userName:data.userName,
+          isLogedIn:true
+        })
+    
   }
+
   const logout= ()=>{
-    axios.get('/user/logout').then((response)=>{
-        const {data}=response;
-        setUserName('')
-        setId('')
-        setUserStatus('loggedout')
-    })
-    .catch((err)=>{
-      console.log(err);
-    })
+        setUser({
+          id:null,
+          userName:null,
+          isLogedIn:false
+        })
   }
 
 return(
-    <userContext.Provider value={{userName,setUserName,id,setId,userStatus,setUserStatus,login,logout}}>
+    <userContext.Provider value={{user,login,logout}}>
     {children}
     </userContext.Provider>
 );

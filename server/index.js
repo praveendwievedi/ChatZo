@@ -7,6 +7,7 @@ const cookieParser=require('cookie-parser')
 const bcrypt=require('bcrypt')
 const jwt=require('jsonwebtoken')
 const cors=require('cors')
+const ws=require('ws')
 
 
 mongoose.connect(process.env.MONGO_DEV_URL).finally((err)=>{
@@ -94,4 +95,10 @@ app.get('/user/logout',(req,res)=>{
     
 })
 
-app.listen(port,()=>console.log(`server running on port: ${port}`))
+const server=app.listen(port,()=>console.log(`server running on port: ${port}`))
+
+// const wss=ws.Server({server});
+
+// wss.on('connection',(connected)=>{
+//    console.log(connected); 
+// })

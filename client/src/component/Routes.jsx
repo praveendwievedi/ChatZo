@@ -2,21 +2,19 @@ import React,{useContext,useEffect, useState} from 'react'
 import Register from './Register'
 import {userContext} from '../authServices/userContext'
 import axios from 'axios'
+import ChatPage from './ChatPage'
 
 function Routes() {
-  const {userName,id,userStatus,setUserStatus,logout}=useContext(userContext)
-  const [userData,setUserData]=useState('')
+  const {user}=useContext(userContext)
+  // const [userData,setUserData]=useState('')
   
-  const logOut=()=>{
-    logout()
-  }
+  // const logOut=()=>{
+  //   logout()
+  // }
 
-   if(userStatus === 'loggedin'){
+   if(user.isLogedIn){
     return (
-      <div>
-      <p>Welcome 😃!! {userName} </p>
-      <button className='bg-blue-400 rounded-md px-2 py-4' onClick={logOut}>Logout</button>
-      </div>
+      <ChatPage />
     )
    }
    else{

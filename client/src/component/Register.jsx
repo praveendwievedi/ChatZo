@@ -8,14 +8,14 @@ function Register() {
   const [password,setPassword]=useState('');
   const [loggedInstatus,setLoggedInStatus]=useState('register')
 
-   const {login}=useContext(userContext)
+   const {login,user}=useContext(userContext)
   const handleSUbmit= (e)=>{
     e.preventDefault();
  
    if(loggedInstatus === 'register'){
     axios.post('/user/register',{userName,email,password}).then((response)=>{
      const {data}=response;
-       login()
+       login(data)
     })
     .catch((err)=>{
       throw err;
@@ -24,7 +24,7 @@ function Register() {
    else{
     axios.post('/user/login',{email,password}).then((response)=>{
       const {data}=response;
-      login()
+      login(data)
      })
      .catch((err)=>{
        throw err;
