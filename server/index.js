@@ -15,7 +15,9 @@ mongoose.connect(process.env.MONGO_DEV_URL).finally((err)=>{
            else console.log('mongodb connected');
         })
 
-const port=3000
+        // console.log(process.env.PORT);
+        
+const port=process.env.PORT
 const app=express()
 const secretKey=process.env.JWT_SECRET;
 
@@ -95,10 +97,32 @@ app.get('/user/logout',(req,res)=>{
     
 })
 
-const server=app.listen(port,()=>console.log(`server running on port: ${port}`))
+const server=app.listen(port,()=>{console.log(`serever running on ${port}`)})
 
-// const wss=ws.Server({server});
+const wss=new ws.WebSocketServer({server})
 
-// wss.on('connection',(connected)=>{
-//    console.log(connected); 
-// })
+wss.on('connection',(connection,req)=>{
+    // console.log('connected')
+    // connection.send('hello')
+
+    const cookies=req.headers.cookie;
+    if(cookies){
+        const token=cookies.split('=')[1];
+        if(token){
+            const userData=jwt.verify(token,secretKey);
+            // console.log(userData);
+            const {id,userName}=userData
+            connection.userId=id;
+            connection.userName=userName;
+        }
+    }
+    // console.log([...wss.clients].map(user => user.userName));
+    [...wss.clients].forEach(client =>{
+        client.send(JSON.stringify({
+            online:[...wss.clients].map(({userId,userName}) => ( {id:userId,userName:userName}))
+        }))
+    })
+    
+})
+// wss.on('message')
+

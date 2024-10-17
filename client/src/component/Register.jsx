@@ -34,9 +34,10 @@ function Register() {
 
 
   return (
-    <div className='bg-blue-50 h-screen w-sreen flex items-center'>
-    <div className="w-80 relative flex flex-col p-4 rounded-md text-black bg-white mx-auto">
-      <div className="text-2xl font-bold mb-2 text-[#1e0e4b] text-center">Welcome<span className="text-[#7747ff] px-1">{loggedInstatus === 'login' ? 'back' : ''} 😃</span></div>
+   <div className='bg-red-50 h-screen w-sreen flex justify-center items-center'>
+     <div className='bg-red-100 backdrop-blur-lg rouded w-1/3 flex justify-center items-center p-4 rounded-md'>
+    <div className="w-[90%] relative flex flex-col p-4 rounded-md text-black bg-white mx-auto">
+      <div className="text-2xl font-bold mb-2 text-[#1e0e4b] text-center">Welcome<span className="text-red-500 px-1">{loggedInstatus === 'login' ? 'back' : ''} 👋</span></div>
        <div className="text-sm font-normal mb-4 text-center text-[#1e0e4b]">{loggedInstatus === 'register' ? 'Sign up to create your account' : 'Login  to your account'}</div>
       <form className="flex flex-col gap-3" onSubmit={handleSUbmit}>
       {loggedInstatus === 'register' && 
@@ -72,25 +73,26 @@ function Register() {
       </div>
     <button 
     type="submit" 
-    className="bg-blue-400 w-max m-auto px-6 py-2 rounded text-white text-sm font-normal">
+    className="bg-red-500 hover:bg-red-600 w-max m-auto px-6 py-2 rounded text-white text-sm font-normal">
     {loggedInstatus === 'register' ? 'Register' : 'Log In'}</button>
 
     </form>
     {loggedInstatus === 'register' && 
       <div className='mt-3 text-center'>
-      Already a member? <button className='text-blue-400 px-2 hover:cursor-pointer' onClick={e => setLoggedInStatus('login')}>Sign In</button>
+      Already a member? <button className='text-red-500 hover:underline px-2 hover:cursor-pointer' onClick={e => setLoggedInStatus('login')}>Sign In</button>
      </div>
     }
 
     {loggedInstatus === 'login' && 
       <div className='mt-3 text-center'>
-      Yet not a member? <button className='text-blue-400 px-2 hover:cursor-pointer' onClick={ e => setLoggedInStatus('register')}>Register</button>
+      Yet not a member? <button className='text-red-500 hover:underline px-2 hover:cursor-pointer' onClick={ e => setLoggedInStatus('register')}>Register</button>
      </div>
     }
 
     </div>
     </div>
+   </div>
   )
 }
-
+ 
 export default Register

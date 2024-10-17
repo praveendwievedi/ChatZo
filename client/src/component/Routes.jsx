@@ -6,15 +6,12 @@ import ChatPage from './ChatPage'
 
 function Routes() {
   const {user}=useContext(userContext)
-  // const [userData,setUserData]=useState('')
-  
-  // const logOut=()=>{
-  //   logout()
-  // }
-
    if(user.isLogedIn){
+    // console.log(user);
+    
+    
     return (
-      <ChatPage />
+      <ChatPage currentUser={user}/>
     )
    }
    else{
