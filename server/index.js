@@ -149,7 +149,9 @@ wss.on('connection',(connection,req)=>{
             [...wss.clients].filter(client => client.userId === recipent)
             .forEach(client => client.send(JSON.stringify({
                 text,
-                chatId:chat._id
+                chatId:chat._id,
+                sender:connection.userId,
+                recipent
             })))
         }
 

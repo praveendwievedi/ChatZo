@@ -3,6 +3,7 @@ import Avatar from './Avatar'
 import LeftChatPage from './LeftChatPage'
 import ChatPageRightHeader from './ChatPageRightHeader'
 import DefaultPage from './DefaultPage'
+import {uniqBy} from 'lodash'
 
 function ChatPage({currentUser}) {
 
@@ -35,14 +36,17 @@ function ChatPage({currentUser}) {
     if('online' in messageData){
       showOnlinePeople(messageData.online) 
     }
-    else{
-      const {text,chatId}=messageData
-      setMessages(prev => ([...prev,{text:messageData.text,isOur:false}]))
+    else if('text' in messageData){
+      const {text,chatId,recipent,sender}=messageData
+      setMessages(prev => ([...prev,{
+        text:text,
+        isOur:false,
+        senderID:sender,
+        recipentId:recipent,
+        chatId
+      }]))
       
     } 
-    // }else if('text' in messageData){
-    //   setMessages(prev => ([...prev,{text:messageData.text,isOur:false}]))
-    // }
   }
     useEffect(()=>{
      const ws= new WebSocket(import.meta.env.VITE_WS_URL)
@@ -63,13 +67,24 @@ function ChatPage({currentUser}) {
       recipent:selectedUserId,
       text:newMessage
      }))
-     setMessages( prev => ([...prev,{text:newMessage,isOurs:true,sender:currentUser.id}]))
+     setMessages( prev => ([...prev,{
+      text:newMessage,
+      isOurs:true,
+      sender:currentUser.id,
+      recipent:selectedUserId,
+      chatId:Date.now()
+    }]))
      setNewMessage('');
     }
 
+    // useEffect(()=>{
+
+    // },[])
+    const messagesWithoutDupes=uniqBy(messages,'chatId')
+
   return (
     <div className='h-screen w-screen flex'>
-     <LeftChatPage onlineFriends={onlineFriends} setSelectedUserId={setSelectedUserId} currentUser={currentUser} />
+     <LeftChatPage onlineFriends={onlineFriends} setSelectedUserId={setSelectedUserId} currentUser={currentUser} selectedUserId={selectedUserId} />
       
      <div className='w-3/4 bg-red-50'>
        {!selectedUserId === true ?
@@ -78,15 +93,25 @@ function ChatPage({currentUser}) {
         <div className='w-full h-full flex flex-col '>
            {/* nav-bar for message part */}
           <ChatPageRightHeader onlineFriends={onlineFriends} selectedUserId={selectedUserId} />
+
          <div className='flex-grow px-2 flex flex-col gap-2'> 
-           {messages.map(msg =>(
-             <div
-             className='bg-red-300 rounded-md p-2'
-             >
-              {msg.text}
+            <div className="relative h-full">
+              <div className="overflow-y-scroll absolute top-2 left-0 right-0 bottom-2">
+              {messagesWithoutDupes.map(msg =>(
+                <div key={msg.chatId} className={(msg.sender === currentUser.id ? 'text-right' : 'text-left')}>
+                <div
+                className={(msg.sender !== currentUser.id ? 'bg-white ' : 'bg-red-300 ') + 'inline-block text-left p-2 rounded-md '}
+                >
+                {/* <Avatar userId={msg.sender} userName={onlineFriends[msg.sender]}/> */}
+                {msg.text}
+                </div>
+                </div>
+              ))}
              </div>
-           ))}
-         </div> 
+           </div>
+         </div>
+
+
         <div className='flex w-full gap-3 pb-3 px-3'>
         {/* footer for message part */}
         <div className='bg-red-200 rounded-md p-2 '>

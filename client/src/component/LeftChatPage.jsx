@@ -1,19 +1,35 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Avatar from './Avatar'
 import Logo from './Logo'
 
-function LeftChatPage({onlineFriends,setSelectedUserId,currentUser}) {
+function LeftChatPage({onlineFriends,setSelectedUserId,currentUser,selectedUserId}) {
+  const [searchBar,setSearchBar]=useState(false)
+
   return (
     <div className='w-1/4 bg-white flex flex-col'>
      <div className='flex-grow'>
-     <div className='bg-red-500 py-4 px-3'>
-      <Logo />
+     <div className='bg-red-500 py-4 px-3  flex flex-col gap-2'>
+        <div className='flex items-center justify-between'>
+         <Logo />
+         <div className='text-white px-4' onClick={ e => setSearchBar(!searchBar)}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-6">
+           <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+         </svg>
+         </div>
+       </div>
+       <div className={'w-full' + (!searchBar && ' hidden')}>
+       <input 
+        type='text'
+        placeholder='Search'
+        className='rounded-md outline-none p-2 w-full'
+       />
+       </div>
      </div>
-     <div className=''>
+     <div className='w-full flex flex-col'>
       {Object.keys(onlineFriends).filter( id => id !== currentUser.id).map( userId =>(
         <div 
         key={userId}
-        className={'p-3 border-b-4 border-gray-200 flex items-center gap-2'}
+        className={'py-4 border-b-4 border-gray-200 flex items-center gap-2'}
         onClick={ e => setSelectedUserId(userId)}
         >
         <Avatar userName={onlineFriends[userId]} userId={userId} />
