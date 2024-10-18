@@ -1,13 +1,13 @@
 import React from 'react'
 import Avatar from './Avatar'
+import Logo from './Logo'
 
 function LeftChatPage({onlineFriends,setSelectedUserId,currentUser}) {
   return (
     <div className='w-1/4 bg-white flex flex-col'>
      <div className='flex-grow'>
-     <div className='bg-red-500 py-4 px-3 flex gap-3'>
-      <p>images</p>
-      <p>logo</p>
+     <div className='bg-red-500 py-4 px-3'>
+      <Logo />
      </div>
      <div className=''>
       {Object.keys(onlineFriends).filter( id => id !== currentUser.id).map( userId =>(

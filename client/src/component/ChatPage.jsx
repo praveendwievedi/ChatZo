@@ -2,6 +2,7 @@ import React,{useEffect,useState} from 'react'
 import Avatar from './Avatar'
 import LeftChatPage from './LeftChatPage'
 import ChatPageRightHeader from './ChatPageRightHeader'
+import DefaultPage from './DefaultPage'
 
 function ChatPage({currentUser}) {
 
@@ -9,6 +10,7 @@ function ChatPage({currentUser}) {
   const [onlineFriends,setOnlineFriends]=useState({}) 
   const [selectedUserId,setSelectedUserId]=useState(null)
   const [newMessage,setNewMessage]=useState('')
+  const [messages,setMessages]=useState([])
 
   // console.log(currentUser);
   
@@ -23,13 +25,24 @@ function ChatPage({currentUser}) {
     
   }
   
-  const handleMessages=(e)=>{
-    const messageData=JSON.parse(e.data)
+  const handleMessages=(ev)=>{
+    // console.log(ev);
+    
+    const messageData=JSON.parse(ev.data)
+    // console.log(messageData);
+    
     
     if('online' in messageData){
-      showOnlinePeople(messageData.online)
-     
+      showOnlinePeople(messageData.online) 
     }
+    else{
+      const {text,chatId}=messageData
+      setMessages(prev => ([...prev,{text:messageData.text,isOur:false}]))
+      
+    } 
+    // }else if('text' in messageData){
+    //   setMessages(prev => ([...prev,{text:messageData.text,isOur:false}]))
+    // }
   }
     useEffect(()=>{
      const ws= new WebSocket(import.meta.env.VITE_WS_URL)
@@ -37,14 +50,21 @@ function ChatPage({currentUser}) {
      setWs(ws)
 
      ws.addEventListener('message',handleMessages)
+    //  ws.addEventListener()
     },[])
 
     function handleSendMessage(e){
      e.preventDefault();
+
+     console.log('sending',"-->",{newMessage});
+     
      ws.send(JSON.stringify({
+      // sender:currentUser.id,
       recipent:selectedUserId,
       text:newMessage
      }))
+     setMessages( prev => ([...prev,{text:newMessage,isOurs:true,sender:currentUser.id}]))
+     setNewMessage('');
     }
 
   return (
@@ -53,19 +73,19 @@ function ChatPage({currentUser}) {
       
      <div className='w-3/4 bg-red-50'>
        {!selectedUserId === true ?
-        <div className='w-full h-full flex items-center justify-center'> 
-       <div className=' text-gray-500 font-bold flex items-center gap'>
-       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-       </svg>
-        <span>Select user from side bar to chat</span> </div>
-        </div>
+        <DefaultPage />
         :
         <div className='w-full h-full flex flex-col '>
            {/* nav-bar for message part */}
           <ChatPageRightHeader onlineFriends={onlineFriends} selectedUserId={selectedUserId} />
-         <div className='flex grow px-2 flex items-center justify-center'> 
-        message will be shown here
+         <div className='flex-grow px-2 flex flex-col gap-2'> 
+           {messages.map(msg =>(
+             <div
+             className='bg-red-300 rounded-md p-2'
+             >
+              {msg.text}
+             </div>
+           ))}
          </div> 
         <div className='flex w-full gap-3 pb-3 px-3'>
         {/* footer for message part */}
