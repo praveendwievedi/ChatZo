@@ -15,6 +15,10 @@ const userSchema=new Schema({
     password:{
     type:String,
     default:"Qwerty@123"
+    },
+    profileImage:{
+        type:String,
+        default:'default.jpg'
     }
 },{
     timestamps:true

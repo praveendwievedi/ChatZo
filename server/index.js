@@ -8,6 +8,8 @@ const bcrypt=require('bcrypt')
 const jwt=require('jsonwebtoken')
 const cors=require('cors')
 const ws=require('ws')
+const path=require('path')
+const { profile } = require('console')
 
 
 mongoose.connect(process.env.MONGO_DEV_URL).finally((err)=>{
@@ -16,11 +18,12 @@ mongoose.connect(process.env.MONGO_DEV_URL).finally((err)=>{
         })
 
         // console.log(process.env.PORT);
-        
+
 const port=process.env.PORT
 const app=express()
 const secretKey=process.env.JWT_SECRET;
 
+app.use(express.static(path.join(__dirname,'public')));
 app.use(cors({
     origin:process.env.CLIENT_ORIGIN,
     credentials:true,
@@ -61,12 +64,14 @@ app.post('/user/register',async (req,res)=>{
     email,
     password
    })
+  
+   const {profileImage,userName : username,_id} =createdUser
 
   const token=await jwt.sign({id:createdUser._id,userName:createdUser.userName},secretKey);
    return res.cookie('tokens',token,{
     sameSite:'none',
     secure:true,
-}).status(201).send('user created')
+}).status(201).json({profileImage,id,username})
 })
 
 app.post('/user/login',async (req,res)=>{
@@ -80,10 +85,11 @@ app.post('/user/login',async (req,res)=>{
 
    if(userData){
         const token=await jwt.sign({id:userData._id,userName:userData.userName},secretKey);
+        const {profileImage,userName,_id:id}=userData;
       return res.cookie('tokens',token,{
         sameSite:'none',
         secure:true,
-       }).status(200).send('user logged in')
+       }).status(200).json({profileImage,userName,id})
     
    }else{
     return res.status(401).send('wrong credentials')
