@@ -11,6 +11,8 @@ function Avatar({userId , userName,
    const colorIndex=(userIdBaseof10 % colors.length)
    
    const color=colors[colorIndex]
+  //  console.log({userId,userName});
+   
 
   return (
     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${color} ${className}`}>

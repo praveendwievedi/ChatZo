@@ -1,9 +1,10 @@
-import React,{useEffect,useState} from 'react'
+import React,{useEffect,useRef,useState} from 'react'
 import Avatar from './Avatar'
 import LeftChatPage from './LeftChatPage'
 import ChatPageRightHeader from './ChatPageRightHeader'
 import DefaultPage from './DefaultPage'
 import {uniqBy} from 'lodash'
+import axios from 'axios'
 
 function ChatPage({currentUser}) {
 
@@ -12,6 +13,7 @@ function ChatPage({currentUser}) {
   const [selectedUserId,setSelectedUserId]=useState(null)
   const [newMessage,setNewMessage]=useState('')
   const [messages,setMessages]=useState([])
+  const messageRef=useRef()
 
   // console.log(currentUser);
   
@@ -37,25 +39,30 @@ function ChatPage({currentUser}) {
       showOnlinePeople(messageData.online) 
     }
     else if('text' in messageData){
-      const {text,chatId,recipent,sender}=messageData
+      const {text,_id,recipent,sender}=messageData
       setMessages(prev => ([...prev,{
         text:text,
         isOur:false,
         senderID:sender,
         recipentId:recipent,
-        chatId
+        _id
       }]))
       
     } 
   }
-    useEffect(()=>{
-     const ws= new WebSocket(import.meta.env.VITE_WS_URL)
+
+    function ConnectToWs(){
+      const ws= new WebSocket(import.meta.env.VITE_WS_URL)
 
      setWs(ws)
 
      ws.addEventListener('message',handleMessages)
-    //  ws.addEventListener()
-    },[])
+     ws.addEventListener('close',()=>(
+      setTimeout(()=>(
+        ConnectToWs()
+      ),1000)
+     ))
+    }
 
     function handleSendMessage(e){
      e.preventDefault();
@@ -63,7 +70,6 @@ function ChatPage({currentUser}) {
      console.log('sending',"-->",{newMessage});
      
      ws.send(JSON.stringify({
-      // sender:currentUser.id,
       recipent:selectedUserId,
       text:newMessage
      }))
@@ -72,15 +78,34 @@ function ChatPage({currentUser}) {
       isOurs:true,
       sender:currentUser.id,
       recipent:selectedUserId,
-      chatId:Date.now()
+      _id:Date.now()
     }]))
      setNewMessage('');
     }
 
-    // useEffect(()=>{
-
-    // },[])
-    const messagesWithoutDupes=uniqBy(messages,'chatId')
+    //auto scroll to down every time
+    useEffect(()=>{
+      const div=messageRef.current;
+      if(div){
+        div.scrollIntoView({behavior:'smooth',block:'end'});
+      }
+    },[messages])
+    
+    //eastablishing the connection if it is closed
+    useEffect(()=>{
+    ConnectToWs()
+    },[])
+   
+    // setting the messages after fetching it form backend server 
+    useEffect(()=>{
+     if(selectedUserId){
+      axios.get('/message/'+selectedUserId).then((res)=>(
+        setMessages(res.data)
+        // console.log(res.data)
+      ))
+     }
+    },[selectedUserId])
+    const messagesWithoutDupes=uniqBy(messages,'_id')
 
   return (
     <div className='h-screen w-screen flex'>
@@ -94,19 +119,28 @@ function ChatPage({currentUser}) {
            {/* nav-bar for message part */}
           <ChatPageRightHeader onlineFriends={onlineFriends} selectedUserId={selectedUserId} />
 
+
+        {/* here i want to show all the messages for that i used here flex-grow which will take all the 
+        remaining space */}
          <div className='flex-grow px-2 flex flex-col gap-2'> 
+
+         {/* here i put relative to the parent element so i can put messages here so that when we scroll 
+         the message will move with it */}
             <div className="relative h-full">
+
               <div className="overflow-y-scroll absolute top-2 left-0 right-0 bottom-2">
               {messagesWithoutDupes.map(msg =>(
-                <div key={msg.chatId} className={(msg.sender === currentUser.id ? 'text-right' : 'text-left')}>
+                <div key={msg._id} className={(msg.sender === currentUser.id ? 'text-right' : 'text-left') + ' py-2'}>
+                {/* <div className={(msg.sender !== currentUser.id ? 'bg-white ' : 'bg-red-300 ')+ 'text-left max-w-[60%]'}>{onlineFriends[msg.sender]}</div> */}
                 <div
-                className={(msg.sender !== currentUser.id ? 'bg-white ' : 'bg-red-300 ') + 'inline-block text-left p-2 rounded-md '}
+                className={(msg.sender !== currentUser.id ? 'bg-white ' : 'bg-red-300 ') + 'inline-block text-left p-2 rounded-md max-w-[60%]'}
                 >
                 {/* <Avatar userId={msg.sender} userName={onlineFriends[msg.sender]}/> */}
                 {msg.text}
                 </div>
                 </div>
               ))}
+              <div ref={messageRef}></div>
              </div>
            </div>
          </div>

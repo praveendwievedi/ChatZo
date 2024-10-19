@@ -10,6 +10,7 @@ const cors=require('cors')
 const ws=require('ws')
 const path=require('path')
 const chatModel=require('./models/Chats')
+const {UserDetails} =require('./middlewares/authentication')
 
 
 mongoose.connect(process.env.MONGO_DEV_URL).finally((err)=>{
@@ -50,6 +51,24 @@ app.get('/user/profile',(req,res)=>{
         const userData= jwt.verify(token,secretKey)
         return res.json(userData)
     }
+})
+
+app.get('/message/:userId',UserDetails,async(req,res)=>{
+    const {userId}=req.params;
+    const {id}=req.user;
+    
+    // console.log({userId,id});
+    
+    if(!userId || !id){
+        res.send('Login first')
+    }
+    
+    const chatDetails=await chatModel.find({
+        sender: {$in :[userId,id]},
+        recipent:{ $in :[userId,id]}
+    }).sort({createdAt: 1})
+
+    res.json(chatDetails)
 })
 
 
@@ -134,9 +153,6 @@ wss.on('connection',(connection,req)=>{
         
         const messageData=JSON.parse(msg)
         const {recipent,text} =messageData   
-        // console.log({recipent,text});
-
-        // const recipentClient=[...wss.clients].find( client => client.userId === recipent)
 
         if(recipent){
             // console.log({recipent,text});
@@ -149,25 +165,11 @@ wss.on('connection',(connection,req)=>{
             [...wss.clients].filter(client => client.userId === recipent)
             .forEach(client => client.send(JSON.stringify({
                 text,
-                chatId:chat._id,
+                _id:chat._id,
                 sender:connection.userId,
                 recipent
             })))
         }
-
-        //  const chat=await chatModel.create({
-        //     sender:connection.userId,
-        //     recipent:recipentId,
-        //     text
-        //  })
-
-        // if(recipentClient){
-        //     recipentClient.send(JSON.stringify({
-        //       from:connection.userId,
-        //       text:text,
-        //       messageId:chat._id
-        //     }))
-        // }
     })
     
 })
