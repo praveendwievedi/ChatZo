@@ -71,6 +71,11 @@ app.get('/message/:userId',UserDetails,async(req,res)=>{
     res.json(chatDetails)
 })
 
+app.get('/allusers',async(req,res)=>{
+   const users=await userModel.find({},{_id:1,userName:1})
+   res.json(users);
+})
+
 
 app.post('/user/register',async (req,res)=>{
     const {userName,email,password}=req.body;
@@ -127,8 +132,36 @@ const server=app.listen(port,()=>{console.log(`serever running on ${port}`)})
 const wss=new ws.WebSocketServer({server})
 
 wss.on('connection',(connection,req)=>{
-    // console.log('connected')
-    // connection.send('hello')
+   
+    //here this function will send the data of online clients every 3 seconds.
+    function notifyAboutOnlinePeople() {
+        [...wss.clients].forEach(client => {
+          client.send(JSON.stringify({
+            online:[...wss.clients].map(({userId,userName}) => ( {id:userId,userName:userName}))
+          }));
+        });
+      }
+    
+      connection.isAlive = true;
+    
+      //this timer is runing for  every three second till client close the connection
+      connection.timer = setInterval(() => {
+        connection.ping();
+        connection.deathTimer = setTimeout(() => {
+          connection.isAlive = false;
+          clearInterval(connection.timer);
+          connection.terminate();
+          notifyAboutOnlinePeople();
+        }, 1000);
+      }, 3000);
+    
+      //this will respond to the ping send to the wss server, if it is alive then death timer will be cleaned.
+      connection.on('pong', () => {
+        clearTimeout(connection.deathTimer);
+      });
+    
+
+
 
     const cookies=req.headers.cookie;
     if(cookies){
@@ -141,12 +174,6 @@ wss.on('connection',(connection,req)=>{
             connection.userName=userName;
         }
     }
-    // console.log([...wss.clients].map(user => user.userName));
-    [...wss.clients].forEach(client =>{
-        client.send(JSON.stringify({
-            online:[...wss.clients].map(({userId,userName}) => ( {id:userId,userName:userName}))
-        }))
-    })
 
     connection.on('message',async(msg)=>{
         // console.log(msg);
@@ -170,6 +197,13 @@ wss.on('connection',(connection,req)=>{
                 recipent
             })))
         }
+    });
+
+    //sending all the online users
+    [...wss.clients].forEach(client =>{
+        client.send(JSON.stringify({
+            online:[...wss.clients].map(({userId,userName}) => ( {id:userId,userName:userName}))
+        }))
     })
     
 })
