@@ -4,17 +4,29 @@ import Logo from './Logo'
 
 function LeftChatPage({onlineFriends,setSelectedUserId,currentUser,selectedUserId}) {
   const [searchBar,setSearchBar]=useState(false)
+  function handleClick(e){
+    if(searchBar){
+      setSearchBar(false)
+    }
+  }
 
   return (
-    <div className='w-1/4 bg-white flex flex-col'>
+    <div className='w-1/4 bg-white flex flex-col' onClick={e => handleClick(e)}>
      <div className='flex-grow'>
      <div className='bg-red-500 py-4 px-3  flex flex-col gap-2'>
         <div className='flex items-center justify-between'>
          <Logo />
+         <div className='flex items-center gap-2'>
+         <div className='text-white'>
+         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+         </svg>
+         </div>
          <div className='text-white px-4' onClick={ e => setSearchBar(!searchBar)}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-6">
            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
          </svg>
+         </div>
          </div>
        </div>
        <div className={'w-full' + (!searchBar && ' hidden')}>
