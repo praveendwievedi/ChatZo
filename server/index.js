@@ -21,7 +21,7 @@ mongoose.connect(process.env.MONGO_DEV_URL).finally((err)=>{
 
         // console.log(process.env.PORT);
 
-const port=process.env.PORT
+const PORT=process.env.PORT || 3000;
 const app=express()
 const secretKey=process.env.JWT_SECRET;
 
