@@ -25,9 +25,11 @@ const port=process.env.PORT || 3000;
 const app=express()
 const secretKey=process.env.JWT_SECRET;
 
+const allowedOrigin=process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+
 app.use(express.static(path.join(__dirname,'public')));
 app.use(cors({
-    origin:process.env.CLIENT_ORIGIN,
+    origin:allowedOrigin,
     credentials:true,
 }))
 app.use(express.json())
