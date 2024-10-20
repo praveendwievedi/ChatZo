@@ -1,11 +1,11 @@
 import React,{useContext, useEffect,useRef,useState} from 'react'
-import Avatar from './Avatar'
-import DefaultPage from './DefaultPage'
+import Avatar from '../Avatar'
+import DefaultPage from '../DefaultPage'
 import {uniqBy} from 'lodash'
 import axios from 'axios'
-import Contact from './Contact'
-import Logo from './Logo'
-import { userContext } from '../authServices/userContext'
+import Contact from '../Contact'
+import Logo from '../Logo'
+import { userContext } from '../../authServices/userContext'
 
 function ChatPage() {
 

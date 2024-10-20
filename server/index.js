@@ -12,9 +12,10 @@ const path=require('path')
 const chatModel=require('./models/Chats')
 const {UserDetails} =require('./middlewares/authentication')
 const cloudinary =require('cloudinary').v2;
+const userRouter =require('./routes/user')
 
 
-mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/mern-chat').finally((err)=>{
+mongoose.connect('mongodb://localhost:27017/mern-chat').finally((err)=>{
            if(err)console.log(err);
            else console.log('mongodb connected');
         })
@@ -29,7 +30,7 @@ const allowedOrigin=process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.sp
 
 app.use(express.static(path.join(__dirname,'public')));
 app.use(cors({
-    origin:allowedOrigin,
+    origin:allowedOrigin || 'http://localhost:5173',
     credentials:true,
 }))
 app.use(express.json())
@@ -42,24 +43,11 @@ app.use(cookieParser())
 //     api_secret:process.env.CLOUDINARY_API_SECRET
 // })
 
+app.use('/user',userRouter)
 
+//for div purpose only
 app.get('/test',(req,res)=>{
 res.send('hello i am working fine')
-})
-
-app.get('/user/profile',(req,res)=>{
-    // console.log(req.cookies);
-    
-    const token=req.cookies?.tokens;
-    // console.log(token);
-    
-    if(!token){
-        return res.status(401).send('not authorized')
-    }
-    else{
-        const userData= jwt.verify(token,secretKey)
-        return res.json(userData)
-    }
 })
 
 app.get('/message/:userId',UserDetails,async(req,res)=>{
@@ -85,56 +73,6 @@ app.get('/allusers',async(req,res)=>{
    res.json(users);
 })
 
-
-app.post('/user/register',async (req,res)=>{
-    const {userName,email,password}=req.body;
-    if (!userName || !email || !password) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
-    
-   const createdUser=await userModel.create({
-    userName,
-    email,
-    password
-   })
-  
-   const {profileImage,userName : username,_id} =createdUser
-
-  const token=await jwt.sign({id:createdUser._id,userName:createdUser.userName},secretKey);
-   return res.cookie('tokens',token,{
-    sameSite:'none',
-    secure:true,
-}).status(201).json({profileImage,id,username})
-})
-
-app.post('/user/login',async (req,res)=>{
-    const {email,password}=req.body;
-    
-    if (!email || !password) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
-    
-   const userData=await userModel.findOne({ email,password},{userName:1,_id:1})
-
-   if(userData){
-        const token=await jwt.sign({id:userData._id,userName:userData.userName},secretKey);
-        const {profileImage,userName,_id:id}=userData;
-      return res.cookie('tokens',token,{
-        sameSite:'none',
-        secure:true,
-       }).status(200).json(userData)
-    
-   }else{
-    return res.status(401).send('wrong credentials')
-   }
-   
-})
-
-app.get('/user/logout',(req,res)=>{
-    
-    return res.cookie('tokens','',{sameSite:'none',secure:true}).status(200).send('user Logged out')
-    
-})
 
 const server=app.listen(port,()=>{console.log(`serever running on ${port}`)})
 

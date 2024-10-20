@@ -5,7 +5,7 @@ import Routes from './component/Routes'
 // import {ToastContainer} from 'react-toastify'
 
 function App() {
-  axios.defaults.baseURL=import.meta.env.VITE_API_URL;
+  axios.defaults.baseURL=import.meta.env.VITE_API_URL || 'http://localhost:3000';
   axios.defaults.withCredentials=true;
 
   return (

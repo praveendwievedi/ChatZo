@@ -1,15 +1,12 @@
 import React,{useContext,useEffect, useState} from 'react'
-import Register from './Register'
+import Register from './Pages/Register'
 import {userContext} from '../authServices/userContext'
 import axios from 'axios'
-import ChatPage from './ChatPage'
+import ChatPage from './Pages//ChatPage'
 
 function Routes() {
   const {user}=useContext(userContext)
    if(user.isLogedIn){
-    // console.log(user);
-    
-    
     return (
       <ChatPage />
     )

@@ -1,14 +1,15 @@
 import React, { useState,useContext } from 'react'
 import axios from 'axios'
-import {userContext} from '../authServices/userContext'
-import '../App.css'
-import Logo from './Logo'
+import {userContext} from '../../authServices/userContext'
+import '../../App.css'
+import Logo from '../Logo'
 
 function Register() {
   const [userName,setUserName]=useState('');
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   const [loggedInstatus,setLoggedInStatus]=useState('register')
+  const [fullName,setFullName]=useState('')
 
    const {login,user}=useContext(userContext)
   const handleSUbmit= (e)=>{
@@ -66,6 +67,17 @@ function Register() {
       onChange={(e)=>(setUserName(e.target.value))} />
       </div>
       }
+      {loggedInstatus === 'register' && 
+        <div className="block relative"> 
+      <label className="block text-gray-600 cursor-text text-sm leading-[140%] font-normal mb-2">FullName</label>
+      <input type="text" 
+    
+      className="rounded border border-gray-200 text-sm w-full font-normal leading-[18px] text-black tracking-[0px] appearance-none block h-11 m-0 p-[11px] focus:ring-2 ring-offset-2  ring-gray-900 outline-0"
+      name='fullName'
+      value={fullName}
+      onChange={(e)=>(setFullName(e.target.value))} />
+      </div>
+      }
 
       <div className="block relative"> 
       <label  className="block text-gray-600 cursor-text text-sm leading-[140%] font-normal mb-2">Email</label>
@@ -89,18 +101,23 @@ function Register() {
     <button 
     type="submit" 
     className="bg-red-500 hover:bg-red-600 w-max m-auto px-6 py-2 rounded text-white text-sm font-normal">
-    {loggedInstatus === 'register' ? 'Register' : 'Log In'}</button>
+    {loggedInstatus === 'register' ? 'Sign Up' : 'Sign In'}</button>
 
     </form>
+    <div className='py-2 flex items-center gap-1'>
+      <div className='h-[1px] w-full bg-gray-300'></div>
+      <div className='text-gray-300'>OR</div>
+      <div className='h-[1px] w-full bg-gray-300'></div>
+    </div>
     {loggedInstatus === 'register' && 
-      <div className='mt-3 text-center'>
-      Already a member? <button className='text-red-500 hover:underline px-2 hover:cursor-pointer' onClick={e => setLoggedInStatus('login')}>Sign In</button>
+      <div className='text-center'>
+      Already a member? <button className='text-red-500 rounded-md px-4 hover:text-red-700 hover:underline px-2 hover:cursor-pointer' onClick={e => setLoggedInStatus('login')}>Sign In</button>
      </div>
     }
 
     {loggedInstatus === 'login' && 
-      <div className='mt-3 text-center'>
-      Yet not a member? <button className='text-red-500 hover:underline px-2 hover:cursor-pointer' onClick={ e => setLoggedInStatus('register')}>Register</button>
+      <div className=' text-center'>
+      Yet not a member? <button className='text-red-500 rounded-md px-4  hover:text-red-700 hover:underline px-2 hover:cursor-pointer' onClick={ e => setLoggedInStatus('register')}>Sign Up</button>
      </div>
     }
 

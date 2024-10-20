@@ -1,4 +1,4 @@
-const {model,Schema}=require('mongoose')
+const {model,Schema, default: mongoose}=require('mongoose')
 
 
 const userSchema=new Schema({
@@ -7,19 +7,29 @@ const userSchema=new Schema({
      required:true,
      unique:true
     },
+    fullName:{
+        type:String,
+        required:true
+    },
     email:{
       type:String,
      required:true,
      unique:true
     },
     password:{
-    type:String,
-    default:"Qwerty@123"
+      type:String,
+      required:true
     },
     profileImage:{
         type:String,
         default:'default.jpg'
-    }
+    },
+    friends:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'User'
+        }
+    ],
 },{
     timestamps:true
 })
