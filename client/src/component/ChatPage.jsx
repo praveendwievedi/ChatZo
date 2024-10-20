@@ -1,12 +1,13 @@
-import React,{useEffect,useRef,useState} from 'react'
+import React,{useContext, useEffect,useRef,useState} from 'react'
 import Avatar from './Avatar'
 import DefaultPage from './DefaultPage'
 import {uniqBy} from 'lodash'
 import axios from 'axios'
 import Contact from './Contact'
 import Logo from './Logo'
+import { userContext } from '../authServices/userContext'
 
-function ChatPage({currentUser}) {
+function ChatPage() {
 
   const [ws,setWs]=useState(null) 
   const [onlineFriends,setOnlineFriends]=useState({}) 
@@ -16,6 +17,9 @@ function ChatPage({currentUser}) {
   const [messages,setMessages]=useState([])
   const [searchBar,setSearchBar]=useState(false)
   const messageRef=useRef()
+
+  const {user} =useContext(userContext)
+  const {userName,id}=user;
 
   // console.log(currentUser);
   
@@ -46,8 +50,20 @@ function ChatPage({currentUser}) {
         recipentId:recipent,
         _id
       }]))
-      
     } 
+    // else if('file' in messageData){
+    //   const { file, _id, recipent, sender } = messageData;
+    //   setMessages((prev) => [
+    //   ...prev,
+    //   {
+    //     file, // file object containing file URL and name
+    //     isOur: false,
+    //     senderID: sender,
+    //     recipentId: recipent,
+    //     _id,
+    //   },
+    //  ]);
+    // }
   }
 
     function ConnectToWs(){
@@ -63,23 +79,29 @@ function ChatPage({currentUser}) {
      ))
     }
 
-    function handleSendMessage(e){
-     e.preventDefault();
-
-     console.log('sending',"-->",{newMessage});
+    function handleSendMessage(e,file = null){
+     if(e)e.preventDefault();
      
      ws.send(JSON.stringify({
       recipent:selectedUserId,
-      text:newMessage
-     }))
-     setMessages( prev => ([...prev,{
       text:newMessage,
-      isOurs:true,
-      sender:currentUser.id,
-      recipent:selectedUserId,
-      _id:Date.now()
-    }]))
-     setNewMessage('');
+      // file
+     }))
+     if(file){
+      axios.get('/message' + selectedUserId).then((res)=>{
+         setMessages(res.data)
+      })
+
+     }else{
+      setMessages( prev => ([...prev,{
+        text:newMessage,
+        isOurs:true,
+        sender:id,
+        recipent:selectedUserId,
+        _id:Date.now()
+      }]))
+       setNewMessage('');
+     }
     }
 
     //for showing searchbar
@@ -105,6 +127,18 @@ function ChatPage({currentUser}) {
         window.location.reload(true);
       })
     }
+
+    //function to handle sending File
+    // function handleFileSending(ev){
+    //  const reader=new FileReader()
+    //  reader.readAsDataURL(ev.target.files[0])
+    //  reader.onload = () => {
+    //   handleSendMessage(null, {
+    //     name: ev.target.files[0].name,
+    //     data: reader.result,
+    //   });
+    //  };
+    // }
     
     //finding online and offline users and use them to show them.
     useEffect(()=>{
@@ -112,7 +146,7 @@ function ChatPage({currentUser}) {
        const {data}=res
        
       const offlineUsersarr= data.filter( friend =>{  
-        return friend._id !== currentUser.id
+        return friend._id !== id
        })
        .filter( friend =>{
         return !Object.keys(onlineFriends).includes(friend._id)
@@ -167,7 +201,7 @@ function ChatPage({currentUser}) {
        </div>
      </div>
      <div className='w-full flex flex-col'>
-      {Object.keys(onlineFriends).filter( id => id !== currentUser.id).map( userId =>(
+      {Object.keys(onlineFriends).filter( uId => uId !== id).map( userId =>(
         <Contact 
         key={userId}
         userId={userId}
@@ -190,11 +224,11 @@ function ChatPage({currentUser}) {
      <div className='bg-red-100 px-2 py-4 flex items-center justify-between'>
       <div className='px-4 flex items-center gap-1'>
       <Avatar
-      userName={currentUser.userName}
-      userId={currentUser.id}
+      userName={userName}
+      userId={id}
       online={true}
        />
-       <span >{currentUser.userName}</span>
+       <span >{userName}</span>
       </div>
       <div className='px-2' onClick={handleLogout}>
        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -244,15 +278,38 @@ function ChatPage({currentUser}) {
               <div className="overflow-y-scroll absolute top-2 left-0 right-0 bottom-2">
               <div className='pr-2'>
               {messagesWithoutDupes.map(msg =>(
-                <div key={msg._id} className={(msg.sender === currentUser.id ? 'text-right' : 'text-left') + ' py-[2px]'}>
-                {/* <div className={(msg.sender !== currentUser.id ? 'bg-white ' : 'bg-red-300 ')+ 'text-left max-w-[60%]'}>{onlineFriends[msg.sender]}</div> */}
-                <div
-                className={(msg.sender !== currentUser.id ? 'bg-white ' : 'bg-red-300 ') + 'inline-block text-left p-2 rounded-md max-w-[60%]'}
-                >
-                {/* <Avatar userId={msg.sender} userName={onlineFriends[msg.sender]}/> */}
-                {msg.text}
+                <div className={(msg.sender === id ? 'text-right' : 'text-left') + ' py-[2px]'}>
+                 <div
+                  className={(msg.sender !== id ? 'bg-white ' : 'bg-red-300 ') + 'inline-block text-left p-2 rounded-md max-w-[60%]'}
+                   >
+                  {/* Render text message */}
+                  {msg.text && <p>{msg.text}</p>}
+    
+                   {/* Render file (image or link) */}
+                   {msg.file && (
+                     <>
+                       {/* If the file is an image, render it as an image */}
+                       {msg.file.type.startsWith('image/') ? (
+                         <img
+                           src={msg.file.url}
+                           alt={msg.file.name}
+                           className="max-w-full rounded-md mt-2"
+                         />
+                       ) : (
+                     // For non-image files, render as a download link
+                   <a
+                     href={msg.file.url}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="text-blue-600 underline mt-2 block"
+                      >
+                     {msg.file.name}
+                  </a>
+                      )}
+                    </>
+                  )}
                 </div>
-                </div>
+              </div>
               ))}
               </div>
               <div ref={messageRef}></div>
@@ -268,11 +325,12 @@ function ChatPage({currentUser}) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
         </svg>
         </div>
-        <div className='bg-red-200 rounded-md p-2'>
+        <label className='bg-red-200 rounded-md p-2'>
+        <input className='hidden' type='file'/>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        </div>
+        </label>
         <form 
         onSubmit={handleSendMessage}
         className='w-full flex gap-3 '>

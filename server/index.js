@@ -11,6 +11,7 @@ const ws=require('ws')
 const path=require('path')
 const chatModel=require('./models/Chats')
 const {UserDetails} =require('./middlewares/authentication')
+const cloudinary =require('cloudinary').v2;
 
 
 mongoose.connect(process.env.MONGO_DEV_URL).finally((err)=>{
@@ -32,6 +33,12 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
+
+cloudinary.config({
+    cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:process.env.CLOUDINARY_API_KEY,
+    api_secret:process.env.CLOUDINARY_API_SECRET
+})
 
 
 app.get('/test',(req,res)=>{
@@ -105,7 +112,7 @@ app.post('/user/login',async (req,res)=>{
         return res.status(400).json({ error: 'All fields are required' });
     }
     
-   const userData=await userModel.findOne({ email,password})
+   const userData=await userModel.findOne({ email,password},{userName:1,_id:1})
 
    if(userData){
         const token=await jwt.sign({id:userData._id,userName:userData.userName},secretKey);
@@ -113,7 +120,7 @@ app.post('/user/login',async (req,res)=>{
       return res.cookie('tokens',token,{
         sameSite:'none',
         secure:true,
-       }).status(200).json({profileImage,userName,id})
+       }).status(200).json(userData)
     
    }else{
     return res.status(401).send('wrong credentials')
@@ -183,20 +190,48 @@ wss.on('connection',(connection,req)=>{
 
         if(recipent){
             // console.log({recipent,text});
-            const chat=await chatModel.create({
-                recipent,
-                sender:connection.userId,
-                text
-            });
-            
-            [...wss.clients].filter(client => client.userId === recipent)
-            .forEach(client => client.send(JSON.stringify({
-                text,
-                _id:chat._id,
-                sender:connection.userId,
-                recipent
-            })))
-        }
+            // if(file){
+            //  const uploadResponse = await cloudinary.uploader.upload(file.data, {
+            //         resource_type: 'auto',
+            //         public_id: file.name.split('.')[0], // optional: use filename without extension
+            //       });
+
+            //       const chatMessage = new chatModel({
+            //         sender: connection.userId, // Assuming senderId is sent from the client
+            //         recipent: recipent, // Assuming recipientId is sent from the client
+            //         file: {
+            //           fileName: file.name,
+            //           url: uploadResponse.secure_url,
+            //         },
+            //       });
+          
+            //       await chatMessage.save();
+
+            //       [...wss.clients].filter(client => client.userId === recipent)
+            //        .forEach(client => client.send(JSON.stringify({
+            //         file,
+            //         _id:chat._id,
+            //         sender:connection.userId,
+            //         recipent
+            //        })))
+
+            // }
+            // else{
+                const chat=await chatModel.create({
+                    recipent,
+                    sender:connection.userId,
+                    text
+                });
+                
+                [...wss.clients].filter(client => client.userId === recipent)
+                .forEach(client => client.send(JSON.stringify({
+                    text,
+                    _id:chat._id,
+                    sender:connection.userId,
+                    recipent
+                })))
+            }
+        // }
     });
 
     //sending all the online users

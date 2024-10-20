@@ -13,6 +13,10 @@ const chatSchema=new Schema({
     },
     text:{
       type:String
+    },
+    file:{
+      fileName:{type:String},
+      url:{type:String}
     }
 },{timestamps:true})
 

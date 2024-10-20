@@ -11,7 +11,7 @@ function Routes() {
     
     
     return (
-      <ChatPage currentUser={user}/>
+      <ChatPage />
     )
    }
    else{
