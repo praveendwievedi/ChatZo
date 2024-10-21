@@ -32,7 +32,7 @@ const devOrigin=process.env.CLIENT_ORIGIN;
 
 app.use(express.static(path.join(__dirname,'public')));
 app.use(cors({
-    origin:allowedOrigin ,
+    origin:allowedOrigin,
     credentials:true,
 }))
 app.use(express.json())
