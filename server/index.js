@@ -14,8 +14,9 @@ const {UserDetails} =require('./middlewares/authentication')
 const cloudinary =require('cloudinary').v2;
 const userRouter =require('./routes/user')
 
-
-mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/mern-chat').finally((err)=>{
+const monoURL=process.env.MONGO_URL
+const localMongo='mongodb://localhost:27017/mern-chat'
+mongoose.connect(monoURL).finally((err)=>{
            if(err)console.log(err);
            else console.log('mongodb connected');
         })
@@ -27,10 +28,11 @@ const app=express()
 const secretKey=process.env.JWT_SECRET;
 
 const allowedOrigin=process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+const devOrigin=process.env.CLIENT_ORIGIN;
 
 app.use(express.static(path.join(__dirname,'public')));
 app.use(cors({
-    origin:allowedOrigin || 'http://localhost:5173',
+    origin:allowedOrigin ,
     credentials:true,
 }))
 app.use(express.json())

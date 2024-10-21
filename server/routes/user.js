@@ -67,7 +67,7 @@ router.post('/logout',(req,res)=>{
     
 })
 
-router.get('/user/profile',(req,res)=>{
+router.get('/profile',(req,res)=>{
     // console.log(req.cookies);
     
     const token=req.cookies?.tokens;
