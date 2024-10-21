@@ -16,7 +16,7 @@ function Register() {
     e.preventDefault();
  
    if(loggedInstatus === 'register'){
-    axios.post('/user/register',{userName,email,password}).then((response)=>{
+    axios.post('/user/register',{userName,email,password,fullName}).then((response)=>{
      const {data}=response;
        login(data)
     })
