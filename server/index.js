@@ -27,14 +27,22 @@ const port=process.env.PORT || 3000;
 const app=express()
 const secretKey=process.env.JWT_SECRET;
 
-const allowedOrigin=process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+// const allowedOrigin=process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
 const devOrigin=process.env.CLIENT_ORIGIN;
 
 app.use(express.static(path.join(__dirname,'public')));
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+
 app.use(cors({
-    origin:allowedOrigin,
-    credentials:true,
-}))
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
