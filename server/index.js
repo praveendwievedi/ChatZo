@@ -15,7 +15,7 @@ const cloudinary =require('cloudinary').v2;
 const userRouter =require('./routes/user')
 
 
-mongoose.connect('mongodb://localhost:27017/mern-chat').finally((err)=>{
+mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/mern-chat').finally((err)=>{
            if(err)console.log(err);
            else console.log('mongodb connected');
         })
