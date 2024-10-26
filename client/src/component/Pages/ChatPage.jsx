@@ -7,7 +7,7 @@ import Contact from '../Contact'
 import Logo from '../Logo'
 import { userContext } from '../../authServices/userContext'
 
-function ChatPage() {
+function ChatPage({currUser}) {
 
   const [ws,setWs]=useState(null) 
   const [onlineFriends,setOnlineFriends]=useState({}) 
@@ -122,7 +122,7 @@ function ChatPage() {
       //this will close the connection between this client and server.
       ws.close()
 
-      axios.get('/user/logout').then((res)=>{
+      axios.post('/user/logout').then((res)=>{
         //this will reload the page
         window.location.reload(true);
       })
@@ -178,6 +178,8 @@ function ChatPage() {
 
     // removing duplicate messages
     const messagesWithoutDupes=uniqBy(messages,'_id')
+    const onlinePeopleExclOurUser = {...onlineFriends};
+    delete onlinePeopleExclOurUser[currUser.id];
 
   return (
     <div className='h-screen w-screen flex'>
@@ -201,12 +203,12 @@ function ChatPage() {
        </div>
      </div>
      <div className='w-full flex flex-col'>
-      {Object.keys(onlineFriends).filter( uId => uId !== id).map( userId =>(
+      {Object.keys(onlinePeopleExclOurUser).map( userId =>(
         <Contact 
         key={userId}
         userId={userId}
         setSelectedUserId={setSelectedUserId}
-        username={onlineFriends[userId]}
+        username={onlinePeopleExclOurUser[userId]}
         online={true}
         />
       )) }

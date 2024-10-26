@@ -46,7 +46,7 @@ router.post('/login',async (req,res)=>{
    }
    else{
       const isMatch=await bcrypt.compare(password,userData.password)
-      console.log(isMatch);
+    //   console.log(isMatch);
      if(isMatch){
         const token=await jwt.sign({id:userData._id,userName:userData.userName},secretKey);
         // const {profileImage,userName,_id:id}=userData;

@@ -8,7 +8,7 @@ function Routes() {
   const {user}=useContext(userContext)
    if(user.isLogedIn){
     return (
-      <ChatPage />
+      <ChatPage currUser={user} />
     )
    }
    else{
